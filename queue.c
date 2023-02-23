@@ -14,15 +14,48 @@
 /* Create an empty queue */
 struct list_head *q_new()
 {
-    return NULL;
+    struct list_head *head = malloc(sizeof(struct list_head));
+
+    if (!head)
+        return NULL;
+
+    INIT_LIST_HEAD(head);
+
+    return head;
 }
 
 /* Free all storage used by queue */
-void q_free(struct list_head *l) {}
+void q_free(struct list_head *l)
+{
+    if (!l)
+        return;
+
+    if (list_empty(l)) {
+        free(l);
+        return;
+    }
+
+    element_t *entry = NULL, *safe = NULL;
+    list_for_each_entry_safe (entry, safe, l, list)
+        q_release_element(entry);
+
+    free(l);
+}
 
 /* Insert an element at head of queue */
 bool q_insert_head(struct list_head *head, char *s)
 {
+    element_t *entry = (element_t *) malloc(sizeof(element_t));
+    char *tmp = (char *) malloc(sizeof(char) * (strlen(s) + 1));
+
+    if (!entry || !tmp)
+        return false;
+
+    strncpy(tmp, s, strlen(s) + 1);
+    entry->value = tmp;
+
+    list_add(&entry->list, head);
+
     return true;
 }
 
