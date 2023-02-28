@@ -251,10 +251,51 @@ void q_reverse(struct list_head *head)
 void q_reverseK(struct list_head *head, int k)
 {
     // https://leetcode.com/problems/reverse-nodes-in-k-group/
+    if (!head || list_empty(head) || list_is_singular(head) || k == 1) {
+        return;
+    }
+
+    struct list_head *node = NULL, *safe = NULL;
+    struct list_head *left = head->next;
+    struct list_head *right;
+    struct list_head *tmp;
+    int count = 0;
+    list_for_each_safe (node, safe, head) {
+        count = count + 1;
+        if (count == k) {
+            count = 0;
+            right = node;
+
+            while (left != right) {
+                if (left->next == right) {
+                    list_move(left, right);
+                    break;
+                }
+                tmp = left->prev;
+                list_move(left, right);
+                list_move(right, tmp);
+
+                tmp = left->prev;
+                left = right->next;
+                right = tmp;
+            }
+
+            left = safe;
+        }
+    }
+
+    return;
 }
 
+
+
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (!head || list_empty(head) || list_is_singular(head)) {
+        return;
+    }
+}
 
 /* Remove every node which has a node with a strictly greater value anywhere to
  * the right side of it */
