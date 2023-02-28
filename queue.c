@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -287,7 +288,42 @@ void q_reverseK(struct list_head *head, int k)
     return;
 }
 
+// merge sort
 
+struct list_head *mergeTwoLists(struct list_head *L1, struct list_head *L2)
+{
+    struct list_head *head = NULL, **ptr = &head, **node;
+
+    for (node = NULL; L1 && L2; *node = (*node)->next) {
+        node = strcmp(list_entry(L1, element_t, list)->value,
+                      list_entry(L2, element_t, list)->value) < 0
+                   ? &L1
+                   : &L2;
+        *ptr = *node;
+        ptr = &(*ptr)->next;
+    }
+    *ptr = (struct list_head *) ((uintptr_t) L1 | (uintptr_t) L2);
+    return head;
+}
+
+struct list_head *mergesort_list(struct list_head *head)
+{
+    if (!head || !head->next)
+        return head;
+    // find the middle node
+    struct list_head *slow = head;
+    for (struct list_head *fast = head; fast && fast->next;
+         fast = fast->next->next)
+        slow = slow->next;
+    struct list_head *mid = slow;
+
+    // cut the link of list
+    slow->prev->next = NULL;
+
+    struct list_head *left = mergesort_list(head), *right = mergesort_list(mid);
+
+    return mergeTwoLists(left, right);
+}
 
 /* Sort elements of queue in ascending order */
 void q_sort(struct list_head *head)
@@ -295,6 +331,17 @@ void q_sort(struct list_head *head)
     if (!head || list_empty(head) || list_is_singular(head)) {
         return;
     }
+    head->prev->next = NULL;
+    head->next = mergesort_list(head->next);
+
+    // complete the circular list
+    struct list_head *p = head, *n = head->next;
+    for (; n != NULL; n = n->next) {
+        n->prev = p;
+        p = n;
+    }
+    p->next = head;
+    head->prev = p;
 }
 
 /* Remove every node which has a node with a strictly greater value anywhere to
