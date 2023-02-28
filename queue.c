@@ -214,7 +214,7 @@ void q_swap(struct list_head *head)
     bool even = 0;
     list_for_each_entry_safe (entry, safe, head, list) {
         if (even) {
-            list_move(&entry->list, entry->list.prev);
+            list_move_tail(&entry->list, entry->list.prev);
         }
         even = !even;
     }
